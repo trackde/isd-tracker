@@ -251,20 +251,20 @@ const BILLS = [
     description: "Allows all registered voters to vote by mail without an excuse; protects permanent absentee status. Must pass both houses in the 2027-28 session as well since it is a constitional amendment.",
     note: "Passed House 33–7. Enrolled." },
 
-  { id: "HB180", topic: "voting", isd: "support", priority: false, status: "floorvote",
+  { id: "HB180", topic: "voting", isd: "support", priority: false, status: "introduced",
     description: "Restores voting rights to people who have served their sentence for a felony.",
     note: "Reported Out of Committee (Administration) in House" },
 
   // ── PROTECTING IMMIGRANTS ───────────────────────────────────────────────
-  { id: "HB58",  topic: "immigrants", isd: "support", priority: false, status: "floorvote",
+  { id: "HB58",  topic: "immigrants", isd: "support", priority: false, status: "introduced",
     description: "Prohibits law enforcement from stopping or detaining individuals based solely on immigration status.",
     note: "Reported Out of Committee (Judiciary) in House" },
 
-  { id: "HB60",  topic: "immigrants", isd: "support", priority: false, status: "floorvote",
+  { id: "HB60",  topic: "immigrants", isd: "support", priority: false, status: "introduced",
     description: "Strengthens DMV data privacy rules to shield personal information, including immigration status, from disclosure.",
     note: "Reported Out of Committee (Judiciary) in House" },
 
-  { id: "HB93",  topic: "immigrants", isd: "support", priority: false, status: "floorvote",
+  { id: "HB93",  topic: "immigrants", isd: "support", priority: false, status: "introduced",
     description: "Limits school resource officers and constables from cooperating with federal immigration enforcement.",
     note: "Reported Out of Committee (Judiciary)" },
 
@@ -272,7 +272,7 @@ const BILLS = [
     description: "Prohibits immigration enforcement at sensitive locations: churches, schools, and health care facilities.",
     note: "ISD Priority Legislation." },
 
-  { id: "HB95",  topic: "immigrants", isd: "support", priority: false, status: "floorvote",
+  { id: "HB95",  topic: "immigrants", isd: "support", priority: false, status: "introduced",
     description: "Restricts release of student records in connection with immigration enforcement.",
     note: "Reported Out of Committee (Education) in House" },
 
@@ -284,20 +284,20 @@ const BILLS = [
     description: "Limits state law enforcement cooperation with federal immigration enforcement at courthouses.",
     note: "Engrossed. In Senate Judiciary Committee." },
 
-  { id: "HB151", topic: "immigrants", isd: "support", priority: false, status: "floorvote",
+  { id: "HB151", topic: "immigrants", isd: "support", priority: false, status: "introduced",
     description: "Prohibits construction and operation of for-profit, privately run detention facilities in Delaware.",
     note: "Reported out of committee." },
 
-  { id: "SB58",  topic: "immigrants", isd: "support", priority: false, status: "committee",
+  { id: "SB58",  topic: "immigrants", isd: "support", priority: false, status: "introduced",
     description: "Prohibits profiling based on immigration status in state law enforcement.",
     note: "Assigned to Finance Committee in Senate" },
 
   // ── ENVIRONMENT ─────────────────────────────────────────────────────────
-  { id: "SB205", topic: "environment", isd: "support", priority: false, status: "floorvote",
+  { id: "SB205", topic: "environment", isd: "support", priority: false, status: "introduced",
     description: "Requires PSC review and approval for large energy users (100MW+) connecting directly to the transmission grid.",
     note: "Reported out of Senate Environment committee, 4 Favorable." },
 
-  { id: "SB130", topic: "environment", isd: "support", priority: false, status: "floorvote",
+  { id: "SB130", topic: "environment", isd: "support", priority: false, status: "crossedover",
     description: "Restricts the sale of Styrofoam food service products in Delaware.",
     note: "Reported Out of Committee" },
 
@@ -305,11 +305,11 @@ const BILLS = [
     description: "Reduces single-use plastic waste in restaurants and food service establishments.",
     note: "" },
 
-  { id: "HB233", topic: "environment", isd: "support", priority: false, status: "floorvote",
+  { id: "HB233", topic: "environment", isd: "support", priority: false, status: "introduced",
     description: "Establishes a rate structure for very large electric customers ensuring their costs are not shifted to other ratepayers.",
     note: "Reported out of committee." },
 
-  { id: "HB186", topic: "environment", isd: "oppose",  priority: false, status: "dead",
+  { id: "HB186", topic: "environment", isd: "oppose",  priority: false, status: "introduced",
     description: "Would provide $45M/year in tax credits for gas plant construction — a fossil fuel subsidy at ratepayer expense.",
     note: "Failed in committee." },
 
@@ -327,7 +327,7 @@ const BILLS = [
     note: "In House Housing Committee." },
 
   // ── CIVIL RIGHTS ────────────────────────────────────────────────────────
-  { id: "SB100", topic: "civil", isd: "support", priority: false, status: "floorvote",
+  { id: "SB100", topic: "civil", isd: "support", priority: false, status: "crossedover",
     description: "Constitutional amendment affirming the right to marry in Delaware regardless of sex or gender of the parties.",
     note: "Reported out of House committee." },
 
@@ -339,9 +339,17 @@ const BILLS = [
     description: "Constitutional amendment guaranteeing a state right to abortion care in Delaware.",
     note: "In House Administration Committee." },
 
-  { id: "HB145", topic: "privacy", isd: "support", priority: false, status: "committee",
+  { id: "HB145", topic: "privacy", isd: "support", priority: false, status: "introduced",
     description: "Bans reverse location and keyword search warrants to protect Delawareans from invasive government surveillance.",
     note: "To House Judiciary Committee" },
+  // ── NEW BILL — NEEDS REVIEW (auto-added 2026-04-15) ──
+  { id: "HB135", topic: "uncategorized", isd: "support", priority: false, status: "introduced",
+    description: "NEW — needs review. Official title: An Act To Amend Title 10 Of The Delaware Code Relating To Homelessness.",
+    note: "Auto-added from LegiScan monitor list. Open Cowork to set topic, description, and position." },
+  // ── NEW BILL — NEEDS REVIEW (auto-added 2026-04-15) ──
+  { id: "HB88", topic: "uncategorized", isd: "support", priority: false, status: "introduced",
+    description: "NEW — needs review. Official title: An Act Proposing An Amendment To Article V Of The Delaware Constitution Relating To Voting.",
+    note: "Auto-added from LegiScan monitor list. Open Cowork to set topic, description, and position." },
 ];
 
 // ════════════════════════════════════════════════════════════════════════════
