@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ISD Legislative Tracker — 2026</title>
+  <style>
+    /* ── Reset & base ──────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Arial, sans-serif; font-size: 14px; background: #F3F6FA; color: #374151; }
+    a { color: #1B3058; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* ── Page header ───────────────────────────────────────────────────── */
+    .page-header {
+      background: #1B3058;
+      color: white;
+      padding: 18px 32px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .page-header h1 { font-size: 20px; font-weight: bold; letter-spacing: 0.02em; }
+    .page-header p  { font-size: 15px; color: white; margin-top: 2px; }
+    .header-divider  { width: 3px; height: 40px; background: #BF2025; border-radius: 2px; }
+
+    /* ── Controls bar ──────────────────────────────────────────────────── */
+    .controls {
+      background: white;
+      border-bottom: 2px solid #E5EAF0;
+      padding: 12px 32px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+    .controls-label { font-size: 11px; font-weight: bold; color: #6B7280;
+      text-transform: uppercase; letter-spacing: 0.08em; margin-right: 4px; }
+    .filter-btn {
+      border: 1.5px solid #D1D5DB; background: white; color: #374151;
+      padding: 4px 12px; border-radius: 20px; font-size: 12px; cursor: pointer;
+      font-family: Arial, sans-serif; transition: all 0.15s;
+    }
+    .filter-btn:hover { border-color: #1B3058; color: #1B3058; }
+    .filter-btn.active { background: #1B3058; color: white; border-color: #1B3058; }
+    .filter-btn.active-red { background: #BF2025; color: white; border-color: #BF2025; }
+    .controls-sep { width: 1px; height: 24px; background: #E5E7EB; margin: 0 4px; }
+
+    /* ── Summary bar ───────────────────────────────────────────────────── */
+    .summary-bar {
+      background: #EBF1F8; padding: 8px 32px;
+      font-size: 12px; color: #4B5563;
+      display: flex; gap: 20px;
+    }
+    .summary-bar span { font-weight: bold; color: #1B3058; }
+
+    /* ── Table wrapper ─────────────────────────────────────────────────── */
+    .table-wrap { padding: 24px 32px; overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; background: white;
+      border-radius: 8px; overflow: hidden;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+
+    /* ── Table header ──────────────────────────────────────────────────── */
+    thead th {
+      background: #1B3058; color: white; text-align: left;
+      padding: 10px 14px; font-size: 12px; font-weight: bold;
+      letter-spacing: 0.05em; text-transform: uppercase; white-space: nowrap;
+      cursor: pointer; user-select: none;
+    }
+    thead th:hover { background: #243f6b; }
+    thead th .sort-icon { margin-left: 4px; opacity: 0.6; }
+    thead th.sorted-asc .sort-icon::after  { content: ' ▲'; }
+    thead th.sorted-desc .sort-icon::after { content: ' ▼'; }
+
+    /* ── Table rows ────────────────────────────────────────────────────── */
+    /* Each bill = two <tr>s: .bill-main and .bill-pipeline */
+    tbody tr.bill-main { border-top: 1px solid #E5EAF0; }
+    tbody tr.bill-main:first-of-type { border-top: none; }
+    tbody tr.bill-main:hover,
+    tbody tr.bill-main:hover + tr.bill-pipeline { background: #F0F5FA; }
+    tbody td { padding: 10px 14px; vertical-align: middle; }
+
+    /* ── Bill number cell ──────────────────────────────────────────────── */
+    .bill-num {
+      font-weight: bold; font-size: 14px; white-space: nowrap;
+      display: flex; align-items: center; gap: 5px;
+    }
+    .bill-num a { color: #1B3058; }
+    .bill-num a:hover { color: #BF2025; }
+    .priority-star { color: #BF2025; font-size: 13px; }
+
+    /* ── Topic badge ───────────────────────────────────────────────────── */
+    .topic-badge {
+      display: inline-block; padding: 3px 9px; border-radius: 12px;
+      font-size: 11px; font-weight: bold; white-space: nowrap;
+    }
+
+    /* ── Position badge ────────────────────────────────────────────────── */
+    .pos-support {
+      display: inline-block; padding: 3px 9px; border-radius: 12px;
+      font-size: 11px; font-weight: bold;
+      background: #DCFCE7; color: #166534;
+    }
+    .pos-oppose {
+      display: inline-block; padding: 3px 9px; border-radius: 12px;
+      font-size: 11px; font-weight: bold;
+      background: #FEE2E2; color: #991B1B;
+    }
+
+    /* ── Description cell ──────────────────────────────────────────────── */
+    .desc-cell { font-size: 13px; color: #374151; line-height: 1.4; }
+
+    /* ── Pipeline row — spans full width below the main info row ───────── */
+    .bill-pipeline td {
+      padding: 0 14px 10px 14px;
+      border-top: none;
+    }
+    .pipeline-inner {
+      display: flex; align-items: center; gap: 12px;
+    }
+    .note-text {
+      font-size: 11px; color: #6B7280; font-style: italic; white-space: nowrap;
+    }
+
+    /* ── Status pipeline ───────────────────────────────────────────────── */
+    .pipeline {
+      display: flex; align-items: stretch;
+      flex: 1; height: 20px;
+    }
+    .stage {
+      flex: 1; display: flex; align-items: center; justify-content: center;
+      font-size: 9px; font-weight: bold; text-align: center;
+      background: #E5E7EB; color: #9CA3AF;
+      padding: 0 3px 0 8px;
+      clip-path: polygon(0% 0%, calc(100% - 6px) 0%, 100% 50%, calc(100% - 6px) 100%, 0% 100%, 6px 50%);
+      margin-right: 2px; white-space: nowrap; overflow: hidden;
+    }
+    .stage:first-child {
+      clip-path: polygon(0% 0%, calc(100% - 6px) 0%, 100% 50%, calc(100% - 6px) 100%, 0% 100%);
+      padding-left: 5px;
+    }
+    .stage:last-child {
+      clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%, 6px 50%);
+      margin-right: 0;
+    }
+    .stage.completed  { background: #3B5998; color: #CBD5E1; }
+    .stage.active     { background: #1B3058; color: white; }
+    .stage.enacted    { background: #166534; color: white; }
+    .stage.dead-stage { background: #E5E7EB; color: #D1D5DB; }
+    .stage.floorvote  { background: #C2760A; color: white; }
+
+    .status-dead { display: flex; align-items: center; gap: 10px; flex: 1; }
+    .dead-label  {
+      background: #BF2025; color: white; font-size: 10px; font-weight: bold;
+      padding: 2px 9px; border-radius: 10px; white-space: nowrap;
+    }
+
+    /* ── Footer ────────────────────────────────────────────────────────── */
+    .page-footer {
+      text-align: center; padding: 16px; font-size: 11px; color: #9CA3AF;
+      border-top: 1px solid #E5EAF0; background: white; margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Header ─────────────────────────────────────────────────────────────── -->
+<div class="page-header">
+  <div>
+    <h1>Indivisible Southern Delaware</h1>
+    <p>2026 State Legislative Tracker &nbsp;·&nbsp; 153rd General Assembly</p>
+  </div>
+  <div class="header-divider"></div>
+  <div style="font-size:14px; color:white; line-height:1.6;">
+    Click any bill number to view details on the General Assembly website.<br>
+    Click column headers to sort. Use buttons to narrow by topic.
+  </div>
+</div>
+
+<!-- ── Controls ───────────────────────────────────────────────────────────── -->
+<div class="controls">
+  <span class="controls-label">Topic</span>
+  <button class="filter-btn active" onclick="filterTopic('all', this)">All</button>
+  <button class="filter-btn" onclick="filterTopic('voting', this)">Voting Rights</button>
+  <button class="filter-btn" onclick="filterTopic('immigrants', this)">Immigrant Rights</button>
+  <button class="filter-btn" onclick="filterTopic('environment', this)">Environment</button>
+  <button class="filter-btn" onclick="filterTopic('economic', this)">Economic Justice</button>
+  <button class="filter-btn" onclick="filterTopic('civil', this)">Civil Rights</button>
+  <button class="filter-btn" onclick="filterTopic('privacy', this)">Privacy</button>
+  <div class="controls-sep"></div>
+  <span class="controls-label">Position</span>
+  <button class="filter-btn" onclick="filterPos('all-pos', this)">All</button>
+  <button class="filter-btn" onclick="filterPos('support', this)">Support</button>
+  <button class="filter-btn active-red" onclick="filterPos('oppose', this)">Oppose</button>
+</div>
+
+<!-- ── Summary bar ─────────────────────────────────────────────────────────── -->
+<div class="summary-bar" id="summary-bar">
+  Showing <span id="vis-count">—</span> bills &nbsp;·&nbsp;
+  <span id="enacted-count">—</span> enacted &nbsp;·&nbsp;
+  <span id="committee-count">—</span> in committee &nbsp;·&nbsp;
+  <span id="introduced-count">—</span> introduced
+</div>
+
+<!-- ── Table ───────────────────────────────────────────────────────────────── -->
+<div class="table-wrap">
+  <table id="bill-table">
+    <thead>
+      <tr>
+        <th onclick="sortTable('id')"     data-col="id">Bill<span class="sort-icon"></span></th>
+        <th onclick="sortTable('topic')"  data-col="topic">Topic<span class="sort-icon"></span></th>
+        <th onclick="sortTable('pos')"    data-col="pos">Position<span class="sort-icon"></span></th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody id="bill-tbody"></tbody>
+  </table>
+</div>
+
+<!-- ── Footer ──────────────────────────────────────────────────────────────── -->
+<div class="page-footer">
+  Indivisible Southern Delaware &nbsp;·&nbsp; admin@indivisiblesode.org &nbsp;·&nbsp;
+  Last updated: April 2026
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════════════════════════
+// ██  BILL DATA — UPDATE STATUS AND NOTES HERE  ██
+//
+//  status options:
+//    "introduced"  — bill filed, no committee action yet
+//    "committee"   — in committee (either chamber)
+//    "floorvote"   — cleared committee, awaiting floor vote
+//    "crossedover" — passed one chamber, now in the other
+//    "passed"      — passed both chambers, awaiting Governor
+//    "enacted"     — signed into law
+//    "dead"        — failed, tabled, or withdrawn
+//
+//  isd: "support" or "oppose"
+//  priority: true marks bill with a ★ (ISD priority legislation)
+//  note: short update shown in gray italics below description
+// ════════════════════════════════════════════════════════════════════════════
+const BILLS = [
+
+  // ── VOTING RIGHTS ──────────────────────────────────────────────────────
+  { id: "SB2",   topic: "voting", isd: "support", priority: true, status: "passed",
+    description: "Amends Delaware Constitution to guarantee early in-person voting for all Delaware voters. Must pass both houses in the 2027-28 session as well since it is a constitional amendment",
+    note: "Passed House 39–1. Enrolled." },
+
+  { id: "SB3",   topic: "voting", isd: "support", priority: true, status: "passed",
+    description: "Allows all registered voters to vote by mail without an excuse; protects permanent absentee status. Must pass both houses in the 2027-28 session as well since it is a constitional amendment.",
+    note: "Passed House 33–7. Enrolled." },
+
+  { id: "HB180", topic: "voting", isd: "support", priority: false, status: "floorvote",
+    description: "Restores voting rights to people who have served their sentence for a felony.",
+    note: "Reported Out of Committee (Administration) in House" },
+
+  // ── PROTECTING IMMIGRANTS ───────────────────────────────────────────────
+  { id: "HB58",  topic: "immigrants", isd: "support", priority: false, status: "floorvote",
+    description: "Prohibits law enforcement from stopping or detaining individuals based solely on immigration status.",
+    note: "Reported Out of Committee (Judiciary) in House" },
+
+  { id: "HB60",  topic: "immigrants", isd: "support", priority: false, status: "floorvote",
+    description: "Strengthens DMV data privacy rules to shield personal information, including immigration status, from disclosure.",
+    note: "Reported Out of Committee (Judiciary) in House" },
+
+  { id: "HB93",  topic: "immigrants", isd: "support", priority: false, status: "floorvote",
+    description: "Limits school resource officers and constables from cooperating with federal immigration enforcement.",
+    note: "Reported Out of Committee (Judiciary)" },
+
+  { id: "HB94",  topic: "immigrants", isd: "support", priority: true,  status: "introduced",
+    description: "Prohibits immigration enforcement at sensitive locations: churches, schools, and health care facilities.",
+    note: "ISD Priority Legislation." },
+
+  { id: "HB95",  topic: "immigrants", isd: "support", priority: false, status: "floorvote",
+    description: "Restricts release of student records in connection with immigration enforcement.",
+    note: "Reported Out of Committee (Education) in House" },
+
+  { id: "HB96",  topic: "immigrants", isd: "support", priority: false, status: "crossedover",
+    description: "Requires the state DOJ to report to the General Assembly on federal data requests related to immigration status.",
+    note: "Assigned to Senate Executive Committee" },
+
+  { id: "HB150", topic: "immigrants", isd: "support", priority: false, status: "crossedover",
+    description: "Limits state law enforcement cooperation with federal immigration enforcement at courthouses.",
+    note: "Engrossed. In Senate Judiciary Committee." },
+
+  { id: "HB151", topic: "immigrants", isd: "support", priority: false, status: "floorvote",
+    description: "Prohibits construction and operation of for-profit, privately run detention facilities in Delaware.",
+    note: "Reported out of committee." },
+
+  { id: "SB58",  topic: "immigrants", isd: "support", priority: false, status: "committee",
+    description: "Prohibits profiling based on immigration status in state law enforcement.",
+    note: "Assigned to Finance Committee in Senate" },
+
+  // ── ENVIRONMENT ─────────────────────────────────────────────────────────
+  { id: "SB205", topic: "environment", isd: "support", priority: false, status: "floorvote",
+    description: "Requires PSC review and approval for large energy users (100MW+) connecting directly to the transmission grid.",
+    note: "Reported out of Senate Environment committee, 4 Favorable." },
+
+  { id: "SB130", topic: "environment", isd: "support", priority: false, status: "floorvote",
+    description: "Restricts the sale of Styrofoam food service products in Delaware.",
+    note: "Reported Out of Committee" },
+
+  { id: "HB111", topic: "environment", isd: "support", priority: false, status: "introduced",
+    description: "Reduces single-use plastic waste in restaurants and food service establishments.",
+    note: "" },
+
+  { id: "HB233", topic: "environment", isd: "support", priority: false, status: "floorvote",
+    description: "Establishes a rate structure for very large electric customers ensuring their costs are not shifted to other ratepayers.",
+    note: "Reported out of committee." },
+
+  { id: "HB186", topic: "environment", isd: "oppose",  priority: false, status: "dead",
+    description: "Would provide $45M/year in tax credits for gas plant construction — a fossil fuel subsidy at ratepayer expense.",
+    note: "Failed in committee." },
+
+  // ── ECONOMIC JUSTICE ────────────────────────────────────────────────────
+  { id: "HB132", topic: "economic", isd: "support", priority: false, status: "introduced",
+    description: "Reforms court-imposed fines and fees to reduce the financial burden on low-income Delawareans.",
+    note: "" },
+
+  { id: "HB133", topic: "economic", isd: "support", priority: false, status: "crossedover",
+    description: "Amends state law governing fines, fees, restitution, and other court-related monetary obligations.",
+    note: "In Senate Judiciary Committee." },
+
+  { id: "SB116", topic: "economic", isd: "support", priority: false, status: "crossedover",
+    description: "Strengthens tenants' right of redemption — allows those facing eviction for nonpayment to pay and stay.",
+    note: "In House Housing Committee." },
+
+  // ── CIVIL RIGHTS ────────────────────────────────────────────────────────
+  { id: "SB100", topic: "civil", isd: "support", priority: false, status: "floorvote",
+    description: "Constitutional amendment affirming the right to marry in Delaware regardless of sex or gender of the parties.",
+    note: "Reported out of House committee." },
+
+  { id: "HB272", topic: "civil", isd: "support", priority: false, status: "crossedover",
+    description: "Establishes state-level protections against violence and harassment at reproductive health clinics (state FACE Act).",
+    note: "Assigned to Senate Judiciary Committee." },
+
+  { id: "SB5",   topic: "civil", isd: "support", priority: false, status: "crossedover",
+    description: "Constitutional amendment guaranteeing a state right to abortion care in Delaware.",
+    note: "In House Administration Committee." },
+
+  { id: "HB145", topic: "privacy", isd: "support", priority: false, status: "committee",
+    description: "Bans reverse location and keyword search warrants to protect Delawareans from invasive government surveillance.",
+    note: "To House Judiciary Committee" },
+];
+
+// ════════════════════════════════════════════════════════════════════════════
+// Topic display config (color + label) — edit label text if needed
+// ════════════════════════════════════════════════════════════════════════════
+const TOPICS = {
+  voting:      { label: "Voting Rights",    bg: "#DBEAFE", color: "#1E3A8A" },
+  immigrants:  { label: "Immigrant Rights",  bg: "#CFFAFE", color: "#0C4A6E" },
+  environment: { label: "Environment",      bg: "#DCFCE7", color: "#14532D" },
+  economic:    { label: "Economic Justice", bg: "#FEF3C7", color: "#78350F" },
+  civil:       { label: "Civil Rights",     bg: "#EDE9FE", color: "#4C1D95" },
+  privacy:     { label: "Privacy",          bg: "#F1F5F9", color: "#1E293B" },
+};
+
+// Status sort order (for sorting column)
+const STATUS_ORDER = { introduced: 1, committee: 2, floorvote: 3, crossedover: 4, passed: 5, enacted: 6, dead: 7 };
+const STAGE_LABELS = ["Introduced", "In Committee", "Crossed Over", "Passed", "Enacted"];
+
+// ── Render pipeline ─────────────────────────────────────────────────────────
+function renderPipeline(status) {
+  if (status === "dead") {
+    return `<div class="status-dead">
+      <div class="pipeline pipeline-dead">
+        ${STAGE_LABELS.map(l => `<div class="stage dead-stage">${l}</div>`).join('')}
+      </div>
+      <span class="dead-label">FAILED</span>
+    </div>`;
+  }
+  // floorvote: Introduced=completed, In Committee=amber, rest=gray
+  if (status === "floorvote") {
+    const stages = STAGE_LABELS.map((label, i) => {
+      let cls = "stage";
+      if (i === 0)      cls += " completed";
+      else if (i === 1) cls += " floorvote";
+      return `<div class="${cls}">${label}</div>`;
+    }).join('');
+    return `<div class="pipeline">${stages}</div>`;
+  }
+  const activeIdx = { introduced: 0, committee: 1, crossedover: 2, passed: 3, enacted: 4 }[status] ?? 0;
+  const stages = STAGE_LABELS.map((label, i) => {
+    let cls = "stage";
+    if (i < activeIdx)       cls += " completed";
+    else if (i === activeIdx) cls += status === "enacted" ? " enacted" : " active";
+    return `<div class="${cls}">${label}</div>`;
+  }).join('');
+  return `<div class="pipeline">${stages}</div>`;
+}
+
+// ── Render badge helpers ─────────────────────────────────────────────────────
+function topicBadge(topic) {
+  const t = TOPICS[topic] || { label: topic, bg: "#E5E7EB", color: "#374151" };
+  return `<span class="topic-badge" style="background:${t.bg};color:${t.color}">${t.label}</span>`;
+}
+function posBadge(pos) {
+  return pos === "support"
+    ? `<span class="pos-support">Support</span>`
+    : `<span class="pos-oppose">Oppose</span>`;
+}
+function legiscanUrl(id) {
+  return `https://legis.delaware.gov/Search/Global?searchTerm=${id.toLowerCase()}`;
+}
+
+// ── Build rows ───────────────────────────────────────────────────────────────
+// Each bill gets TWO <tr>s: a main info row + a full-width pipeline row below.
+function buildRows(data) {
+  return data.map(b => `
+    <tr class="bill-main" data-topic="${b.topic}" data-pos="${b.isd}" data-status="${b.status}">
+      <td>
+        <div class="bill-num">
+          <a href="${legiscanUrl(b.id)}" target="_blank" rel="noopener">${b.id}</a>
+          ${b.priority ? '<span class="priority-star" title="ISD Priority Legislation">★</span>' : ''}
+        </div>
+      </td>
+      <td>${topicBadge(b.topic)}</td>
+      <td>${posBadge(b.isd)}</td>
+      <td class="desc-cell">${b.description}</td>
+    </tr>
+    <tr class="bill-pipeline" data-topic="${b.topic}" data-pos="${b.isd}">
+      <td colspan="4">
+        <div class="pipeline-inner">
+          ${renderPipeline(b.status)}
+          ${b.note ? `<span class="note-text">${b.note}</span>` : ''}
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+// ── State ────────────────────────────────────────────────────────────────────
+let currentTopic = "all";
+let currentPos   = "all-pos";
+let sortCol      = null;
+let sortAsc      = true;
+
+function getFiltered() {
+  return BILLS.filter(b => {
+    const topicOk = currentTopic === "all" || b.topic === currentTopic;
+    const posOk   = currentPos   === "all-pos" || b.isd === currentPos;
+    return topicOk && posOk;
+  });
+}
+
+function getSorted(data) {
+  if (!sortCol) return data;
+  return [...data].sort((a, b) => {
+    let va, vb;
+    if (sortCol === "id")     { va = a.id;     vb = b.id; }
+    if (sortCol === "topic")  { va = a.topic;  vb = b.topic; }
+    if (sortCol === "pos")    { va = a.isd;    vb = b.isd; }
+    if (sortCol === "status") { va = STATUS_ORDER[a.status]; vb = STATUS_ORDER[b.status]; }
+    if (va < vb) return sortAsc ? -1 : 1;
+    if (va > vb) return sortAsc ?  1 : -1;
+    return 0;
+  });
+}
+
+function render() {
+  const filtered = getFiltered();
+  const sorted   = getSorted(filtered);
+  document.getElementById("bill-tbody").innerHTML = buildRows(sorted);
+  // Summary
+  document.getElementById("vis-count").textContent = filtered.length;
+  document.getElementById("enacted-count").textContent =
+    filtered.filter(b => b.status === "enacted").length;
+  document.getElementById("committee-count").textContent =
+    filtered.filter(b => b.status === "committee" || b.status === "floorvote" || b.status === "crossedover").length;
+  document.getElementById("introduced-count").textContent =
+    filtered.filter(b => b.status === "introduced").length;
+  // Sort icons
+  document.querySelectorAll("thead th").forEach(th => {
+    th.classList.remove("sorted-asc", "sorted-desc");
+    if (th.dataset.col === sortCol) {
+      th.classList.add(sortAsc ? "sorted-asc" : "sorted-desc");
+    }
+  });
+}
+
+// ── Controls ─────────────────────────────────────────────────────────────────
+function filterTopic(topic, btn) {
+  currentTopic = topic;
+  document.querySelectorAll(".controls .filter-btn[onclick*='filterTopic']")
+    .forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  render();
+}
+
+function filterPos(pos, btn) {
+  currentPos = pos;
+  document.querySelectorAll(".controls .filter-btn[onclick*='filterPos']")
+    .forEach(b => b.classList.remove("active", "active-red"));
+  if (pos === "oppose") btn.classList.add("active-red");
+  else btn.classList.add("active");
+  render();
+}
+
+function sortTable(col) {
+  if (sortCol === col) sortAsc = !sortAsc;
+  else { sortCol = col; sortAsc = true; }
+  render();
+}
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+window.addEventListener("DOMContentLoaded", () => {
+  currentPos = "all-pos";
+  // Ensure correct starting button states
+  document.querySelectorAll(".controls .filter-btn[onclick*='filterPos']")
+    .forEach(b => b.classList.remove("active", "active-red"));
+  document.querySelector(".controls .filter-btn[onclick*=\"'all-pos'\"]")
+    ?.classList.add("active");
+  render();
+});
+</script>
+</body>
+</html>
